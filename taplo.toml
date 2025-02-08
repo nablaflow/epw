@@ -1,0 +1,11 @@
+exclude = ["crates/workspace-hack/Cargo.toml"]
+
+[formatting]
+reorder_keys = false
+
+[[rule]]
+include = ["crates/*/Cargo.toml"]
+keys = ["dependencies"]
+
+[rule.formatting]
+reorder_keys = true

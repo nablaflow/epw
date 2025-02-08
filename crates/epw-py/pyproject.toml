@@ -1,0 +1,15 @@
+[project]
+name = "epw-py"
+version = "0.1.0"
+requires-python = ">=3.9"
+dynamic = ["version"]
+
+dependencies = ["polars>=1.21.0,<2.0"]
+
+[tool.maturin]
+module-name = "epw"
+features = ["pyo3/extension-module"]
+
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"

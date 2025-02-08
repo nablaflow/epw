@@ -1,22 +1,58 @@
+#![allow(clippy::missing_errors_doc)]
+
 use chrono::{NaiveDate, NaiveDateTime};
 use itertools::Itertools;
 use polars::prelude::*;
 use std::{
-    io::{self, BufRead},
+    io::{self, BufRead, BufReader},
+    marker::PhantomData,
     str::FromStr,
 };
 use thiserror::Error;
 
 const BASE_CAPACITY: usize = 8760 * 5;
 
-pub struct EpwReader<T> {
-    r: T,
-    max_lines: Option<usize>,
+#[derive(Debug)]
+pub struct Epw {
+    pub ts: Vec<NaiveDateTime>,
+    pub wind_speed: Vec<f32>,
+    pub wind_dir: Vec<f32>,
 }
 
-impl<T: BufRead> EpwReader<T> {
+impl Epw {
+    pub fn into_dataframe(self) -> Result<DataFrame, Error> {
+        Ok(DataFrame::new(vec![
+            Series::new("ts".into(), self.ts).into(),
+            Series::from_vec("wind_dir".into(), self.wind_dir).into(),
+            Series::from_vec("wind_speed".into(), self.wind_speed).into(),
+        ])?)
+    }
+}
+
+pub struct EpwReader<'a, T> {
+    r: T,
+    max_lines: Option<usize>,
+    phantom: PhantomData<&'a T>,
+}
+
+impl<'a> EpwReader<'a, BufReader<&'a [u8]>> {
+    #[must_use]
+    pub fn from_slice(s: &'a [u8]) -> Self {
+        Self {
+            r: BufReader::new(s),
+            max_lines: None,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<T: BufRead> EpwReader<'_, T> {
     pub fn new(r: T) -> Self {
-        Self { r, max_lines: None }
+        Self {
+            r,
+            max_lines: None,
+            phantom: PhantomData,
+        }
     }
 
     #[must_use]
@@ -25,15 +61,14 @@ impl<T: BufRead> EpwReader<T> {
         self
     }
 
-    #[allow(clippy::missing_errors_doc)]
-    pub fn parse(self) -> Result<DataFrame, Error> {
+    pub fn parse(self) -> Result<Epw, Error> {
         let lines = self
             .r
             .lines()
             .enumerate()
             .map(|(idx, line)| (idx + 1, line));
 
-        let mut timestamps = Vec::<NaiveDateTime>::with_capacity(BASE_CAPACITY);
+        let mut ts = Vec::<NaiveDateTime>::with_capacity(BASE_CAPACITY);
         let mut wind_speed = Vec::<f32>::with_capacity(BASE_CAPACITY);
         let mut wind_dir = Vec::<f32>::with_capacity(BASE_CAPACITY);
 
@@ -47,16 +82,16 @@ impl<T: BufRead> EpwReader<T> {
             let line = line?;
             let cols = line.split(',').collect_vec();
 
-            timestamps.push(compose_ts(&cols, line_no)?);
+            ts.push(compose_ts(&cols, line_no)?);
             wind_dir.push(parse_col(&cols, "Wind direction", 20, line_no)?);
             wind_speed.push(parse_col(&cols, "Wind speed", 21, line_no)?);
         }
 
-        Ok(DataFrame::new(vec![
-            Series::new("ts".into(), timestamps).into(),
-            Series::from_vec("wind_dir".into(), wind_dir).into(),
-            Series::from_vec("wind_speed".into(), wind_speed).into(),
-        ])?)
+        Ok(Epw {
+            ts,
+            wind_speed,
+            wind_dir,
+        })
     }
 }
 
@@ -78,7 +113,12 @@ fn compose_ts(cols: &[&str], line_no: usize) -> Result<NaiveDateTime, Error> {
         .ok_or(Error::InvalidTimestamp { line_no })
 }
 
-fn parse_col<T>(cols: &[&str], name: &'static str, idx: usize, line_no: usize) -> Result<T, Error>
+fn parse_col<T>(
+    cols: &[&str],
+    name: &'static str,
+    idx: usize,
+    line_no: usize,
+) -> Result<T, Error>
 where
     T: std::fmt::Debug + FromStr,
 {
@@ -116,24 +156,28 @@ mod tests {
     use super::*;
     use insta::assert_snapshot;
     use pretty_assertions::assert_matches;
-    use std::io::{BufReader, Cursor};
+    use std::io::BufReader;
 
-    const EXAMPLE_1: Cursor<&[u8]> = Cursor::new(include_bytes!("fixtures/example1.epw"));
-    const MISSING_COLS: Cursor<&[u8]> = Cursor::new(include_bytes!("fixtures/missing_columns.epw"));
-    const CANNOT_PARSE_COL: Cursor<&[u8]> =
-        Cursor::new(include_bytes!("fixtures/bad_wind_dir_col.epw"));
-    const INVALID_TIMESTAMP: Cursor<&[u8]> =
-        Cursor::new(include_bytes!("fixtures/invalid_timestamp.epw"));
+    const EXAMPLE_1: &str = include_str!("fixtures/example1.epw");
+    const MISSING_COLS: &str = include_str!("fixtures/missing_columns.epw");
+    const CANNOT_PARSE_COL: &str = include_str!("fixtures/bad_wind_dir_col.epw");
+    const INVALID_TIMESTAMP: &str =
+        include_str!("fixtures/invalid_timestamp.epw");
 
     #[test]
     fn fixture_1() {
-        let df = EpwReader::new(BufReader::new(EXAMPLE_1)).parse().unwrap();
+        let df = EpwReader::from_slice(EXAMPLE_1.as_bytes())
+            .parse()
+            .unwrap()
+            .into_dataframe()
+            .unwrap();
+
         assert_snapshot!(df_to_json(df));
     }
 
     #[test]
     fn over_max_lines() {
-        let res = EpwReader::new(BufReader::new(EXAMPLE_1))
+        let res = EpwReader::from_slice(EXAMPLE_1.as_bytes())
             .set_max_lines(5)
             .parse();
 
@@ -142,7 +186,7 @@ mod tests {
 
     #[test]
     fn missing_cols() {
-        let res = EpwReader::new(BufReader::new(MISSING_COLS)).parse();
+        let res = EpwReader::from_slice(MISSING_COLS.as_bytes()).parse();
 
         assert_matches!(
             res,
@@ -155,7 +199,7 @@ mod tests {
 
     #[test]
     fn cannot_parse_col() {
-        let res = EpwReader::new(BufReader::new(CANNOT_PARSE_COL)).parse();
+        let res = EpwReader::from_slice(CANNOT_PARSE_COL.as_bytes()).parse();
 
         assert_matches!(
             res,
@@ -168,19 +212,20 @@ mod tests {
 
     #[test]
     fn invalid_timestamp() {
-        let res = EpwReader::new(BufReader::new(INVALID_TIMESTAMP)).parse();
+        let res =
+            EpwReader::new(BufReader::new(INVALID_TIMESTAMP.as_bytes())).parse();
 
         assert_matches!(res, Err(Error::InvalidTimestamp { line_no: 12 }));
     }
 
     fn df_to_json(mut df: DataFrame) -> String {
-        let mut buf = Cursor::new(Vec::new());
+        let mut buf = vec![];
 
         JsonWriter::new(&mut buf)
             .with_json_format(JsonFormat::JsonLines)
             .finish(&mut df)
             .unwrap();
 
-        String::from_utf8(buf.into_inner()).unwrap()
+        String::from_utf8(buf).unwrap()
     }
 }
