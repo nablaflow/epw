@@ -10,23 +10,3 @@ updates:
       actions-deps:
         patterns:
           - "*"
-
-  - package-ecosystem: cargo
-    directory: '/'
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    groups:
-      rust-deps:
-        patterns:
-          - "*"
-
-  - package-ecosystem: pip
-    directory: '/crates/epw-py'
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    groups:
-      python-deps:
-        patterns:
-          - "*"
