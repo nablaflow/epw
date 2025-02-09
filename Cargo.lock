@@ -2461,8 +2461,11 @@ name = "workspace-hack"
 version = "0.1.0"
 dependencies = [
  "bitflags",
+ "chrono",
+ "either",
  "libc",
  "memchr",
+ "num-traits",
  "phf_shared",
  "polars",
  "polars-core",

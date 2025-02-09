@@ -15,7 +15,10 @@ publish = false
 
 ### BEGIN HAKARI SECTION
 [dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+either = { version = "1" }
 memchr = { version = "2" }
+num-traits = { version = "0.2" }
 phf_shared = { version = "0.11" }
 polars = { version = "0.46", features = ["json"] }
 polars-core = { version = "0.46", default-features = false, features = ["algorithm_group_by", "docs", "dtype-date", "dtype-datetime", "dtype-duration", "dtype-struct", "dtype-time", "fmt", "rows", "zip_with"] }

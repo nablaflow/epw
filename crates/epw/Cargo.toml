@@ -7,7 +7,7 @@ license = "MIT"
 [dependencies]
 chrono = { version = "~0.4", default-features = false }
 itertools = "~0.14"
-polars = { version = "~0.46", default-features = false, features = [
+polars = { version = "~0.46", optional = true, default-features = false, features = [
   "dtype-datetime",
 ] }
 thiserror = "~2.0"
@@ -20,3 +20,7 @@ polars = { version = "~0.46", default-features = false, features = [
   "json",
 ] }
 pretty_assertions = { version = "1.4.1", features = ["unstable"] }
+
+[features]
+default = []
+polars = ["dep:polars"]

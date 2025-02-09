@@ -8,7 +8,7 @@ license = "MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-epw = { version = "0.1.0", path = "../epw" }
+epw = { version = "0.1.0", path = "../epw", features = ["polars"] }
 pyo3 = { version = "0.23.4", features = ["extension-module"] }
 pyo3-polars = "0.20.0"
 workspace-hack = { version = "0.1", path = "../workspace-hack" }

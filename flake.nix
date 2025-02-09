@@ -73,7 +73,7 @@
       epw = craneLib.buildPackage (individualCrateArgs
         // {
           pname = "epw";
-          cargoExtraArgs = "-p epw";
+          cargoExtraArgs = "-p epw --features polars";
 
           src = pkgs.lib.fileset.toSource {
             root = ./.;
