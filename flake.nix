@@ -102,6 +102,7 @@
               (craneLib.fileset.commonCargoSources ./crates/epw)
               (craneLib.fileset.commonCargoSources ./crates/workspace-hack)
               (craneLib.fileset.commonCargoSources ./crates/epw-py)
+              (pkgs.lib.fileset.fileFilter (file: builtins.any file.hasExt ["pyi"]) ./crates/epw-py)
             ];
           };
 
