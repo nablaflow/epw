@@ -9,12 +9,6 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    poetry2nix = {
-      url = "github:nix-community/poetry2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
   };
 
   outputs = inputs @ {
@@ -33,7 +27,6 @@
           (import rust-overlay)
 
           (final: prev: {
-            poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix {pkgs = prev;};
             beamPackages = prev.beam_minimal.packagesWith prev.beam_minimal.interpreters.erlang_27;
           })
         ];
