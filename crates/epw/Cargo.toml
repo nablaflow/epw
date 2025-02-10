@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
+[lib]
+doctest = false
+
 [dependencies]
 chrono = { version = "~0.4", default-features = false }
 itertools = "~0.14"

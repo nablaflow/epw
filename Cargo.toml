@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
+members = [
+  "crates/epw",
+  "crates/epw-py",
+  "crates/epw-ex/native/epw_ex",
+  "crates/workspace-hack",
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -8,3 +13,6 @@ edition = "2021"
 
 [workspace.metadata.crane]
 name = "epw-workspace"
+
+[profile.release]
+lto = "thin"

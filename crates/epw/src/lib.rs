@@ -76,7 +76,7 @@ impl<T: BufRead> EpwReader<'_, T> {
 
         for (actual_lines, (line_no, line)) in lines.skip(8).enumerate() {
             if let Some(max_lines) = self.max_lines {
-                if actual_lines > max_lines {
+                if actual_lines + 1 > max_lines {
                     return Err(Error::MaxLinesReached { max_lines });
                 }
             }

@@ -1,0 +1,20 @@
+[package]
+name = "epw_ex"
+license = "MIT"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "epw_ex"
+crate-type = ["cdylib"]
+test = false
+doctest = false
+
+[dependencies]
+chrono = { version = "~0.4", default-features = false }
+epw = { version = "0.1.0", path = "../../../epw" }
+rustler = { version = "~0.36", features = [
+  "nif_version_2_16",
+  "nif_version_2_17",
+] }
+workspace-hack = { version = "0.1", path = "../../../workspace-hack" }
