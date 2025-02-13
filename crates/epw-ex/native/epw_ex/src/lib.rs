@@ -28,7 +28,7 @@ struct Args {
 }
 
 #[nif(schedule = "DirtyCpu")]
-pub fn parse_into_preview<'a>(
+pub fn parse<'a>(
     env: Env<'a>,
     buf: Binary<'a>,
     Args { max_lines }: Args,

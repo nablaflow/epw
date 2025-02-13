@@ -3,5 +3,5 @@ defmodule Epw.Native do
 
   use Rustler, otp_app: :epw, crate: :epw_ex
 
-  def parse_into_preview(_binary, _args), do: :erlang.nif_error(:nif_not_loaded)
+  def parse(_binary, _args), do: :erlang.nif_error(:nif_not_loaded)
 end

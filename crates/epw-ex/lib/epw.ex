@@ -7,10 +7,10 @@ defmodule Epw do
 
   defstruct [:ts, :wind_speed, :wind_dir]
 
-  def parse_into_preview(binary, args \\ []) when is_binary(binary) and is_list(args) do
+  def parse(binary, args \\ []) when is_binary(binary) and is_list(args) do
     args = Map.merge(@default_args, Map.new(args))
 
-    with {:ok, m} <- Epw.Native.parse_into_preview(binary, Map.new(args)) do
+    with {:ok, m} <- Epw.Native.parse(binary, Map.new(args)) do
       m = Map.update(m, :ts, [], &tss_to_naive_dts/1)
 
       {:ok, struct!(%__MODULE__{}, m)}
