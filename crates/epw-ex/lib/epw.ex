@@ -2,8 +2,6 @@ defmodule Epw do
   @moduledoc false
 
   @default_args %{
-    first_n: 5,
-    last_n: 5,
     max_lines: 10_000
   }
 

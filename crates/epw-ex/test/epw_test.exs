@@ -7,14 +7,6 @@ defmodule EpwTest do
     assert Epw.parse_into_preview(gen_lines(1)) ==
              {:ok, %Epw{ts: [~N[2014-01-02 02:04:00]], wind_speed: [21.0], wind_dir: [20.0]}}
 
-    assert Epw.parse_into_preview(gen_lines(200), first_n: 1, last_n: 1) ==
-             {:ok,
-              %Epw{
-                ts: [~N[2014-01-02 02:04:00], ~N[2014-01-02 02:04:00]],
-                wind_speed: [21.0, 21.0],
-                wind_dir: [20.0, 20.0]
-              }}
-
     assert Epw.parse_into_preview(gen_lines(0) <> "a") ==
              {:error, {:cannot_parse_col, "Cannot parse column `Year` at line no. 9"}}
 
