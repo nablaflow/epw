@@ -4,19 +4,11 @@ import pytest
 import polars as pl
 from polars.testing import assert_frame_equal
 
-SCHEMA = pl.Schema(
-    {
-        "ts": pl.Datetime(time_unit="ms"),
-        "wind_dir": pl.Float32(),
-        "wind_speed": pl.Float32(),
-    }
-)
-
 
 def test_empty() -> None:
     assert_frame_equal(
         epw.parse_into_dataframe(_gen_lines(0)),
-        pl.DataFrame(schema=SCHEMA),
+        pl.DataFrame(schema=epw.SCHEMA),
     )
 
 
@@ -29,7 +21,7 @@ def test_one_line() -> None:
                 "wind_dir": [20.0],
                 "wind_speed": [21.0],
             },
-            schema=SCHEMA,
+            schema=epw.SCHEMA,
         ),
     )
 
@@ -38,7 +30,9 @@ def test_errors() -> None:
     with pytest.raises(ValueError, match="Cannot parse column `Year` at line no. 9"):
         epw.parse_into_dataframe(_gen_lines(0) + b"a")
 
-    with pytest.raises(ValueError, match="Missing column `Wind direction` at line no. 9"):
+    with pytest.raises(
+        ValueError, match="Missing column `Wind direction` at line no. 9"
+    ):
         epw.parse_into_dataframe(_gen_lines(0) + b"1,2,3,4,5,6")
 
 

@@ -1,13 +1,9 @@
 {
-  crane,
-  rustToolchain,
+  craneLib,
   pkgs,
   lib,
-  cargo-hakari,
   python3,
 }: let
-  craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
-
   src = lib.fileset.toSource {
     root = ../.;
 
@@ -17,7 +13,6 @@
       ../deny.toml
       ../rustfmt.toml
       ../taplo.toml
-      ../.config
       (craneLib.fileset.commonCargoSources ../crates)
       (lib.fileset.fileFilter (file: builtins.any file.hasExt ["rs" "toml" "snap" "epw"]) ../crates)
     ];
@@ -38,32 +33,22 @@
 
   epw = craneLib.buildPackage (commonArgs
     // {
+      inherit cargoArtifacts;
+
       pname = "epw";
-      cargoExtraArgs = "-p epw --features polars";
-      inherit cargoArtifacts;
-    });
-
-  epw-py = craneLib.buildPackage (commonArgs
-    // {
-      pname = "epw-py";
-      cargoExtraArgs = "-p epw-py";
-      inherit cargoArtifacts;
-
-      installPhaseCommand = ''
-        mkdir -p $out/lib
-        cp target/release/libepw_py.so $out/lib/epw.so
-      '';
+      cargoExtraArgs = "-p epw";
     });
 
   epw-ex = craneLib.buildPackage (commonArgs
     // {
-      pname = "epw-ex";
-      cargoExtraArgs = "-p epw-ex";
       inherit cargoArtifacts;
+
+      pname = "epw-ex";
+      cargoExtraArgs = "-p epw_ex";
     });
 in {
   checks = {
-    inherit epw epw-py;
+    inherit epw epw-ex;
 
     epw-clippy = craneLib.cargoClippy (commonArgs
       // {
@@ -106,28 +91,7 @@ in {
         partitions = 1;
         partitionType = "count";
       });
-
-    ws-hakari = craneLib.mkCargoDerivation {
-      inherit src;
-
-      pname = "ws-hakari";
-
-      cargoArtifacts = null;
-      doInstallCargoArtifacts = false;
-
-      buildPhaseCargoCommand = ''
-        cargo hakari generate --diff  # workspace-hack Cargo.toml is up-to-date
-        cargo hakari manage-deps --dry-run  # all workspace crates depend on workspace-hack
-        cargo hakari verify
-      '';
-
-      nativeBuildInputs = [
-        cargo-hakari
-      ];
-    };
   };
 
-  packages = {
-    epw-py-cdylib = epw-py;
-  };
+  packages = {};
 }

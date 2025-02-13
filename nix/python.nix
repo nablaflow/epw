@@ -1,37 +1,52 @@
 {
-  epw-py-cdylib,
-  stdenv,
+  buildPythonPackage,
   lib,
-  python3Packages,
-}: {
-  checks = {
-    epw-py-test = stdenv.mkDerivation {
-      pname = "epw-py-test";
-      version = "dev";
+  rustPlatform,
+  pytestCheckHook,
+  polars,
+}: let
+  epw-py = buildPythonPackage rec {
+    pname = "epw";
+    version = "dev";
 
-      src = lib.fileset.toSource {
-        root = ../crates/epw-py;
+    src = lib.fileset.toSource {
+      root = ../.;
 
-        fileset = lib.fileset.unions [
-          ../crates/epw-py/tests
-        ];
-      };
-
-      nativeBuildInputs = with python3Packages; [
-        polars
-        pytest
-        ruff
+      fileset = lib.fileset.unions [
+        ../Cargo.toml
+        ../Cargo.lock
+        (lib.fileset.fileFilter (file: builtins.any file.hasExt ["rs" "toml" "py" "typed"]) ../crates)
       ];
-
-      doCheck = true;
-
-      checkPhase = ''
-        export PYTHONPATH="${epw-py-cdylib}/lib:$PYTHONPATH"
-
-        pytest .
-      '';
-
-      installPhase = "touch $out";
     };
+
+    cargoDeps = rustPlatform.fetchCargoVendor {
+      inherit pname version src;
+      hash = "sha256-CeMoe3iL/8Zv0OIaqv8lYZE61JG0hM/TPk8yE4DQxz8=";
+    };
+
+    nativeBuildInputs = with rustPlatform; [
+      cargoSetupHook
+      maturinBuildHook
+    ];
+
+    dependencies = [
+      polars
+    ];
+
+    nativeCheckInputs = [
+      pytestCheckHook
+    ];
+
+    doCheck = true;
+
+    buildAndTestSubdir = "crates/epw-py";
+  };
+in {
+  checks = {
+    inherit epw-py;
+  };
+
+  packages = {
+    inherit epw-py;
   };
 }

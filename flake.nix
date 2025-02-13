@@ -4,11 +4,6 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     crane.url = "github:ipetkov/crane";
-
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs @ {
@@ -16,7 +11,6 @@
     nixpkgs,
     crane,
     flake-utils,
-    rust-overlay,
     ...
   }:
     flake-utils.lib.eachDefaultSystem (system: let
@@ -24,22 +18,19 @@
         inherit system;
 
         overlays = [
-          (import rust-overlay)
-
           (final: prev: {
+            craneLib = crane.mkLib prev;
             beamPackages = prev.beam_minimal.packagesWith prev.beam_minimal.interpreters.erlang_27;
           })
         ];
       };
 
-      rustToolchain = pkgs.rust-bin.stable.latest.default;
-
-      rustWs = pkgs.callPackage ./nix/rust-ws.nix {inherit crane rustToolchain;};
-      epwPy = pkgs.callPackage ./nix/python.nix {inherit (rustWs.packages) epw-py-cdylib;};
+      rustWs = pkgs.callPackage ./nix/rust-ws.nix {};
+      epwPy = pkgs.python3Packages.callPackage ./nix/python.nix {};
     in {
       checks = rustWs.checks // epwPy.checks;
 
-      packages = rustWs.packages;
+      packages = rustWs.packages // epwPy.packages;
 
       devShells.default = pkgs.mkShell {
         inputsFrom = builtins.attrValues self.checks.${system};
@@ -53,6 +44,7 @@
           cargo-outdated
           poetry
           maturin
+          ruff
         ];
       };
 

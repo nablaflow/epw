@@ -2,8 +2,6 @@
 
 use chrono::{NaiveDate, NaiveDateTime};
 use itertools::Itertools;
-#[cfg(feature = "polars")]
-use polars::prelude::*;
 use std::{
     io::{self, BufRead, BufReader},
     marker::PhantomData,
@@ -14,21 +12,11 @@ use thiserror::Error;
 const BASE_CAPACITY: usize = 8760 * 5;
 
 #[derive(Debug)]
+#[cfg_attr(test, derive(serde::Serialize))]
 pub struct Epw {
     pub ts: Vec<NaiveDateTime>,
     pub wind_speed: Vec<f32>,
     pub wind_dir: Vec<f32>,
-}
-
-impl Epw {
-    #[cfg(feature = "polars")]
-    pub fn into_dataframe(self) -> Result<DataFrame, Error> {
-        Ok(DataFrame::new(vec![
-            Series::new("ts".into(), self.ts).into(),
-            Series::from_vec("wind_dir".into(), self.wind_dir).into(),
-            Series::from_vec("wind_speed".into(), self.wind_speed).into(),
-        ])?)
-    }
 }
 
 pub struct EpwReader<'a, T> {
@@ -146,10 +134,6 @@ pub enum Error {
     #[error("Invalid timestamp at line no. {line_no}")]
     InvalidTimestamp { line_no: usize },
 
-    #[cfg(feature = "polars")]
-    #[error("Failed to compose DataFrame: {0:?}")]
-    Polars(#[from] PolarsError),
-
     #[error("Max amount of lines ({max_lines}) reached")]
     MaxLinesReached { max_lines: usize },
 }
@@ -167,15 +151,10 @@ mod tests {
         include_str!("fixtures/invalid_timestamp.epw");
 
     #[test]
-    #[cfg(feature = "polars")]
     fn fixture_1() {
-        let df = EpwReader::from_slice(EXAMPLE_1.as_bytes())
-            .parse()
-            .unwrap()
-            .into_dataframe()
-            .unwrap();
+        let epw = EpwReader::from_slice(EXAMPLE_1.as_bytes()).parse().unwrap();
 
-        insta::assert_snapshot!(df_to_json(df));
+        insta::assert_json_snapshot!(&epw);
     }
 
     #[test]
@@ -219,17 +198,5 @@ mod tests {
             EpwReader::new(BufReader::new(INVALID_TIMESTAMP.as_bytes())).parse();
 
         assert_matches!(res, Err(Error::InvalidTimestamp { line_no: 12 }));
-    }
-
-    #[cfg(feature = "polars")]
-    fn df_to_json(mut df: DataFrame) -> String {
-        let mut buf = vec![];
-
-        JsonWriter::new(&mut buf)
-            .with_json_format(JsonFormat::JsonLines)
-            .finish(&mut df)
-            .unwrap();
-
-        String::from_utf8(buf).unwrap()
     }
 }

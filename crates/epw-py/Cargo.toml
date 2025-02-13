@@ -5,12 +5,11 @@ edition.workspace = true
 license = "MIT"
 
 [lib]
+name = "epw"
 crate-type = ["cdylib"]
 test = false
 doctest = false
 
 [dependencies]
-epw = { version = "0.1.0", path = "../epw", features = ["polars"] }
-pyo3 = { version = "0.23.4", features = ["extension-module"] }
-pyo3-polars = "0.20.0"
-workspace-hack = { version = "0.1", path = "../workspace-hack" }
+epw = { version = "0.1.0", path = "../epw" }
+pyo3 = { version = "0.23.4", features = ["chrono", "extension-module"] }
