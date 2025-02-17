@@ -1,7 +1,7 @@
 #![allow(clippy::missing_errors_doc)]
 
 use chrono::{NaiveDate, NaiveDateTime};
-use itertools::Itertools;
+use itertools::{izip, Itertools};
 use std::{
     io::{self, BufRead, BufReader},
     marker::PhantomData,
@@ -17,6 +17,21 @@ pub struct Epw {
     pub ts: Vec<NaiveDateTime>,
     pub wind_speed: Vec<f32>,
     pub wind_dir: Vec<f32>,
+}
+
+impl Epw {
+    fn sort_by_ts(self) -> Epw {
+        let (ts, wind_speed, wind_dir) =
+            izip!(self.ts, self.wind_speed, self.wind_dir)
+                .sorted_by_key(|&(dt, _, _)| dt)
+                .multiunzip();
+
+        Self {
+            ts,
+            wind_speed,
+            wind_dir,
+        }
+    }
 }
 
 pub struct EpwReader<'a, T> {
@@ -81,7 +96,8 @@ impl<T: BufRead> EpwReader<'_, T> {
             ts,
             wind_speed,
             wind_dir,
-        })
+        }
+        .sort_by_ts())
     }
 }
 
