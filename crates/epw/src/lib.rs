@@ -105,17 +105,14 @@ fn compose_ts(cols: &[&str], line_no: usize) -> Result<NaiveDateTime, Error> {
     let year: i32 = parse_col(cols, "Year", 0, line_no)?;
     let month: u32 = parse_col(cols, "Month", 1, line_no)?;
     let day: u32 = parse_col(cols, "Day", 2, line_no)?;
-    let hour: u32 = parse_col(cols, "Hour", 3, line_no)?;
-    let minute: u32 = parse_col(cols, "Minute", 4, line_no)?;
+    let hour = parse_col::<u32>(cols, "Hour", 3, line_no)?
+        .checked_sub(1)
+        .ok_or(Error::InvalidTimestamp { line_no })?;
+    let minute = parse_col::<u32>(cols, "Minute", 4, line_no)? % 60;
 
     NaiveDate::from_ymd_opt(year, month, day)
         .ok_or(Error::InvalidTimestamp { line_no })?
-        .and_hms_opt(
-            hour.checked_sub(1)
-                .ok_or(Error::InvalidTimestamp { line_no })?,
-            minute,
-            0,
-        )
+        .and_hms_opt(hour, minute, 0)
         .ok_or(Error::InvalidTimestamp { line_no })
 }
 
@@ -165,6 +162,18 @@ mod tests {
     const CANNOT_PARSE_COL: &str = include_str!("fixtures/bad_wind_dir_col.epw");
     const INVALID_TIMESTAMP: &str =
         include_str!("fixtures/invalid_timestamp.epw");
+
+    #[test]
+    fn compose_ts_() {
+        assert_eq!(
+            NaiveDateTime::parse_from_str(
+                "2015-09-05 01:00:00",
+                "%Y-%m-%d %H:%M:%S"
+            )
+            .unwrap(),
+            compose_ts(&["2015", "9", "5", "2", "60"], 1).unwrap()
+        );
+    }
 
     #[test]
     fn fixture_1() {
