@@ -12,4 +12,4 @@ doctest = false
 
 [dependencies]
 epw = { version = "0.1.0", path = "../epw" }
-pyo3 = { version = "0.23.4", features = ["chrono", "extension-module"] }
+pyo3 = { version = "0.24.1", features = ["chrono", "extension-module"] }
