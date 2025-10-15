@@ -13,7 +13,7 @@ doctest = false
 [dependencies]
 chrono = { version = "~0.4", default-features = false }
 epw = { version = "0.1.0", path = "../../../epw" }
-rustler = { version = "~0.36", features = [
+rustler = { version = "~0.37", features = [
   "nif_version_2_16",
   "nif_version_2_17",
 ] }

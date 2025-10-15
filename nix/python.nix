@@ -1,9 +1,10 @@
 {
   buildPythonPackage,
   lib,
-  rustPlatform,
-  pytestCheckHook,
   polars,
+  pytestCheckHook,
+  rustPlatform,
+  setuptools,
 }: let
   epw-py = buildPythonPackage rec {
     pname = "epw";
@@ -19,9 +20,12 @@
       ];
     };
 
+    pyproject = true;
+    build-system = [ setuptools ];
+
     cargoDeps = rustPlatform.fetchCargoVendor {
       inherit pname version src;
-      hash = "sha256-oGOl7+pra4X2n/ap+BuOzLIRX6V3fG+PUGZ/fJYwCPY=";
+      hash = "sha256-0hxdhTG7k5pZciCsek8f3+Xp7M8NDm/oewMwZi85e/A=";
     };
 
     nativeBuildInputs = with rustPlatform; [

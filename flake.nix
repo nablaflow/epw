@@ -42,9 +42,9 @@
           beamPackages.rebar3
           cargo-insta
           cargo-outdated
-          poetry
           maturin
           ruff
+          uv
         ];
       };
 
