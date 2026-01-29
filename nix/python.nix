@@ -21,11 +21,11 @@
     };
 
     pyproject = true;
-    build-system = [ setuptools ];
+    build-system = [setuptools];
 
     cargoDeps = rustPlatform.fetchCargoVendor {
       inherit pname version src;
-      hash = "sha256-0hxdhTG7k5pZciCsek8f3+Xp7M8NDm/oewMwZi85e/A=";
+      hash = "sha256-/7Fjq3GInAI8TXAk1qOc0c5g5gxcJLCV/6SIv0dkyLI=";
     };
 
     nativeBuildInputs = with rustPlatform; [
