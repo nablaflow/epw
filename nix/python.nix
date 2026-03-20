@@ -25,7 +25,7 @@
 
     cargoDeps = rustPlatform.fetchCargoVendor {
       inherit pname version src;
-      hash = "sha256-/7Fjq3GInAI8TXAk1qOc0c5g5gxcJLCV/6SIv0dkyLI=";
+      hash = "sha256-hE39NIf9yES5cH6EoAwh9xeFnqrda0lyb/BC1OsvrAc=";
     };
 
     nativeBuildInputs = with rustPlatform; [
