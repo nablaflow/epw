@@ -1,8 +1,8 @@
 use chrono::{Datelike, NaiveDateTime, Timelike};
 use epw::{EpwReader, Error as EpwError};
 use rustler::{
-    nif, types::tuple::make_tuple, Binary, Encoder, Env, Error, NifMap,
-    NifResult, Term,
+    Binary, Encoder, Env, Error, NifMap, NifResult, Term, nif,
+    types::tuple::make_tuple,
 };
 
 mod atoms {

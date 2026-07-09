@@ -9,7 +9,7 @@ doctest = false
 
 [dependencies]
 chrono = { version = "~0.4", default-features = false }
-itertools = "~0.14"
+itertools = "~0.15"
 thiserror = "~2.0"
 
 [dev-dependencies]

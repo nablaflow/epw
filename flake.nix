@@ -3,7 +3,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
-    crane.url = "github:ipetkov/crane/v0.23.0";
+    crane.url = "github:ipetkov/crane/v0.23.4";
   };
 
   outputs = inputs @ {
@@ -20,7 +20,7 @@
         overlays = [
           (final: prev: {
             craneLib = crane.mkLib prev;
-            beamPackages = prev.beam_minimal.packagesWith prev.beam_minimal.interpreters.erlang_28;
+            beamPackages = prev.beam_minimal.packagesWith prev.beam_minimal.interpreters.erlang_29;
           })
         ];
       };
@@ -36,7 +36,7 @@
         inputsFrom = builtins.attrValues self.checks.${system};
 
         packages = with pkgs; [
-          beamPackages.elixir
+          beamPackages.elixir_1_20
           beamPackages.erlang
           beamPackages.hex
           beamPackages.rebar3

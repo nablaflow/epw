@@ -1,5 +1,5 @@
 use epw::{Epw, EpwReader, Error as EpwError};
-use pyo3::{exceptions::PyValueError, prelude::*, types::PyDict, IntoPyObject};
+use pyo3::{IntoPyObject, exceptions::PyValueError, prelude::*, types::PyDict};
 
 struct PyEpw(Epw);
 

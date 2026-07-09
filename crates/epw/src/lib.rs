@@ -20,7 +20,7 @@ pub struct Epw {
 }
 
 impl Epw {
-    fn sort_by_ts(self) -> Epw {
+    fn sort_by_ts(self) -> Self {
         let (ts, wind_speed, wind_dir) =
             izip!(self.ts, self.wind_speed, self.wind_dir)
                 .sorted_by_key(|&(dt, _, _)| dt)
@@ -52,7 +52,7 @@ impl<'a> EpwReader<'a, BufReader<&'a [u8]>> {
 }
 
 impl<T: BufRead> EpwReader<'_, T> {
-    pub fn new(r: T) -> Self {
+    pub const fn new(r: T) -> Self {
         Self {
             r,
             max_lines: None,
@@ -61,7 +61,7 @@ impl<T: BufRead> EpwReader<'_, T> {
     }
 
     #[must_use]
-    pub fn set_max_lines(mut self, max_lines: usize) -> Self {
+    pub const fn set_max_lines(mut self, max_lines: usize) -> Self {
         self.max_lines = Some(max_lines);
         self
     }

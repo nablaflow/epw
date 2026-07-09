@@ -19,7 +19,7 @@ defmodule Epw.MixProject do
 
   defp deps do
     [
-      {:rustler, "~> 0.36.1", runtime: false}
+      {:rustler, "~> 0.38.0", runtime: false}
     ]
   end
 end
