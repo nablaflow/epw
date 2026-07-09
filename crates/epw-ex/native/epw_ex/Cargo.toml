@@ -1,6 +1,6 @@
 [package]
 name = "epw_ex"
-license = "MIT"
+license.workspace = true
 version.workspace = true
 edition.workspace = true
 

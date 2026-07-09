@@ -1,7 +1,7 @@
 #![allow(clippy::missing_errors_doc)]
 
 use chrono::{NaiveDate, NaiveDateTime};
-use itertools::{izip, Itertools};
+use itertools::{Itertools, izip};
 use std::{
     io::{self, BufRead, BufReader},
     marker::PhantomData,
@@ -78,10 +78,10 @@ impl<T: BufRead> EpwReader<'_, T> {
         let mut wind_dir = Vec::<f32>::with_capacity(BASE_CAPACITY);
 
         for (actual_lines, (line_no, line)) in lines.skip(8).enumerate() {
-            if let Some(max_lines) = self.max_lines {
-                if actual_lines + 1 > max_lines {
-                    return Err(Error::MaxLinesReached { max_lines });
-                }
+            if let Some(max_lines) = self.max_lines
+                && actual_lines + 1 > max_lines
+            {
+                return Err(Error::MaxLinesReached { max_lines });
             }
 
             let line = line?;

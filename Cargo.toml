@@ -5,6 +5,7 @@ members = ["crates/epw", "crates/epw-py", "crates/epw-ex/native/epw_ex"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [workspace.metadata.crane]
 name = "epw-workspace"
